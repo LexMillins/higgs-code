@@ -1,3 +1,9 @@
+#include "Math/IFunction.h"
+#include "Minuit2/Minuit2Minimizer.h"
+#include "Math/Functor.h"
+#include <string>
+#include <iostream>
+
 void Poisson(TH1D* & h_obs, TH1D* & h_Sig, TH1D* & h_Bkgd){
 
   const double lower = 0.0;
@@ -40,7 +46,11 @@ void Poisson(TH1D* & h_obs, TH1D* & h_Sig, TH1D* & h_Bkgd){
   }
 }
 
-double LLH(const double mu_ggF, const double mu_VBF, const double mu_b){
+double LLH(const double *x){
+  //const double mu_ggF, const double mu_VBF, const double mu_b){
+  const double mu_ggF = x[0];
+  const double mu_VBF = x[1];
+  const double mu_b = x[2];
   
   const double n_ggF_SR1 = 16.2;
   const double n_VBF_SR1 = 0.9;
@@ -52,7 +62,7 @@ double LLH(const double mu_ggF, const double mu_VBF, const double mu_b){
   const double L = (mu_ggF*n_ggF_SR1 + mu_VBF*n_VBF_SR1 + mu_b*n_b_SR1 -1)*log(n_ggF_SR1 + n_VBF_SR1+ n_b_SR1) - (n_ggF_SR1 + n_VBF_SR1 + n_b_SR1) + (mu_ggF*n_ggF_SR2 + mu_VBF*n_VBF_SR2 + mu_b*n_b_SR2 -1)*log(n_ggF_SR2 + n_VBF_SR2 + n_b_SR2) - (n_ggF_SR2 + n_VBF_SR2 + n_b_SR2);
     
  
-  return -1*L;
+  return -2*L;
     
 }
 
@@ -83,16 +93,20 @@ int Minimiser(const char * algoName, int printlevel){
 
 }
 
-
-void Fit(){
+int main(int argc, const char *argv[]){
     using namespace RooFit;
  
-    TH1D* h_obs = NULL;
-    TH1D* h_Sig = NULL;
-    TH1D* h_Bkgd = NULL;
+    int printLevel =0;
+    std::string algoName = "";
 
-    Poisson(h_obs, h_Sig, h_Bkgd);
-    
-    h_obs->Draw();
+    for (int i =1 ; i < argc ; i++){
+
+      std::string arg = argv[i] ;
+
+    }
+
+    int iret = Minimiser(algoName.c_str(), printLevel);
+    return iret;
+
 }
 
