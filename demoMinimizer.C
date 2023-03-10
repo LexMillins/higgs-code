@@ -11,47 +11,10 @@ double Rosenbrock (const double * x)  {
    return  100.*tmp1*tmp1 + tmp2*tmp2;
 }
  
-int demoMinimizer(const char * algoName, int printlevel) {
+int demoMinimizer(const char * algoName, int printLevel);
 
-     ROOT::Math::Minimizer* min = new ROOT::Minuit2::Minuit2Minimizer(algoName) ;
 
-    // set tolerance , etc...
-   min->SetMaxFunctionCalls(1000000);
-   min->SetTolerance(0.001);
-   min->SetPrintLevel(printlevel);
- 
-   // create funciton wrapper for minmizer
-   // a IMultiGenFunction type
-   ROOT::Math::Functor f(&Rosenbrock,2);
-   // starting point
-   double variable[2] = { -1.,1.2};
-   //initial spet sizes
-   double step[2] = {0.01,0.01};
-
-   min->SetFunction(f);
- 
-   // Set the free variables to be minimized!
-   min->SetVariable(0,"x",variable[0], step[0]);
-   min->SetVariable(1,"y",variable[1], step[1]);
-    
-   // do the minimization
-   min->Minimize();
-    
-   const double *xs = min->X();
-   std::cout << "Minimum: f(" << xs[0] << "," << xs[1] << "): " << min->MinValue()  << std::endl;
-    
-   // expected minimum is 0
-   if ( min->MinValue()  < 1.E-4  && f(xs) < 1.E-4) {
-     std::cout << "Minuit2 -  " << algoName << "   converged to the right minimum" << std::endl;
-     return 0;
-   }
-   else
-   std::cerr << "ERROR:  Minuit2 - " << algoName << "   failed to converge !!!" << std::endl;
-    
-   return -1;
-   }
-    
-   int main(int argc, const char *argv[]) {
+int main(int argc, const char *argv[]) {
     
        int printLevel  = 0;
        std::string algoName = ""; // use default (i.e. migrad)
@@ -82,8 +45,50 @@ int demoMinimizer(const char * algoName, int printlevel) {
              std::cout << "       -vvv  : set very verbose mode: show full result at each minimization step" << std::endl;
              return 0;
           }
-       }
+      }
     
        int iret = demoMinimizer(algoName.c_str(), printLevel);
       return iret;
+}
+
+int demoMinimizer(const char * algoName, int printLevel) {
+
+   ROOT::Math::Minimizer* min = new ROOT::Minuit2::Minuit2Minimizer(algoName) ;
+
+   // set tolerance , etc...
+   min->SetMaxFunctionCalls(1000000);
+   min->SetTolerance(0.001);
+   min->SetPrintLevel(printLevel);
+ 
+   // create funciton wrapper for minmizer
+   // a IMultiGenFunction type
+   ROOT::Math::Functor f(&Rosenbrock,2);
+   // starting point
+   double variable[2] = { -1.,1.2};
+   //initial spet sizes
+   double step[2] = {0.01,0.01};
+
+   min->SetFunction(f);
+ 
+   // Set the free variables to be minimized!
+   min->SetVariable(0,"x",variable[0], step[0]);
+   min->SetVariable(1,"y",variable[1], step[1]);
+    
+   // do the minimization
+   min->Minimize();
+    
+   const double *xs = min->X();
+   std::cout << "Minimum: f(" << xs[0] << "," << xs[1] << "): " << min->MinValue()  << std::endl;
+    
+   // expected minimum is 0
+   if ( min->MinValue()  < 1.E-4  && f(xs) < 1.E-4) {
+     std::cout << "Minuit2 -  " << algoName << "   converged to the right minimum" << std::endl;
+     return 0;
    }
+   else
+   std::cerr << "ERROR:  Minuit2 - " << algoName << "   failed to converge !!!" << std::endl;
+    
+   return -1;
+}
+    
+
