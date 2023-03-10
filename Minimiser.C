@@ -50,7 +50,7 @@ double LLH(const double *x){
   //const double mu_ggF, const double mu_VBF, const double mu_b){
   const double mu_ggF = x[0];
   const double mu_VBF = x[1];
-  const double mu_b = x[2];
+  //const double mu_b = x[2];
   
   const double n_ggF_SR1 = 16.2;
   const double n_VBF_SR1 = 0.9;
@@ -65,8 +65,8 @@ double LLH(const double *x){
   const double sig_SR1 = mu_ggF*n_ggF_SR1 + mu_VBF*n_VBF_SR1;
   const double sig_SR2 = mu_ggF*n_ggF_SR2 + mu_VBF*n_VBF_SR2;
 
-  const double bkgd_SR1 = mu_b*n_b_SR1;
-  const double bkgd_SR2 = mu_b*n_b_SR2;
+  const double bkgd_SR1 = n_b_SR1;
+  const double bkgd_SR2 = n_b_SR2;
 
   const double S_tot = sig_SR1 + sig_SR2;
 
@@ -89,21 +89,21 @@ int Minimiser(const char * algoName, int printlevel){
   min->SetTolerance(0.001);
   min->SetPrintLevel(printlevel);
 
-  ROOT::Math::Functor f(&LLH, 3);
+  ROOT::Math::Functor f(&LLH, 2);
 
-  double variable[3] = {1.,1., 1.};
-  double step[3] = {0.01, 0.01, 0.01};
+  double variable[2] = {1.,1.};
+  double step[2] = {0.01, 0.01};
 
   min->SetFunction(f);
 
   min->SetVariable(0, "mu_ggF", variable[0], step[0]);
   min->SetVariable(1, "mu_VBF", variable[1], step[1]);
-  min->SetVariable(2, "mu_b", variable[2], step[2]);
+  //min->SetVariable(2, "mu_b", variable[2], step[2]);
 
   min->Minimize();
 
   const double *vals = min->X();
-  std::cout << "Minimum: f(" << vals[0] << "," << vals[1] << "," << vals[2] << ")" << " " << min->MinValue() << std::endl;
+  std::cout << "Minimum: f(" << vals[0] << "," << vals[1] <<  ")" << " " << min->MinValue() << std::endl;
 
   return 0;
 
