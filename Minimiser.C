@@ -2,6 +2,7 @@
 #include "Minuit2/Minuit2Minimizer.h"
 #include "Math/Functor.h"
 #include <string>
+#include <vector>
 #include <iostream>
 
 void Poisson(TH1D* & h_obs, TH1D* & h_Sig, TH1D* & h_Bkgd){
@@ -46,9 +47,9 @@ void Poisson(TH1D* & h_obs, TH1D* & h_Sig, TH1D* & h_Bkgd){
   }
 }
 
-double LLH(const double *x){
+double LLH(const double *x, const double mu_ggF){
   //const double mu_ggF, const double mu_VBF, const double mu_b){
-  const double mu_ggF = x[0];
+  //const double mu_ggF = x[0];
   const double mu_VBF = x[1];
   //const double mu_b = x[2];
   
@@ -82,7 +83,7 @@ double LLH(const double *x){
     
 }
 
-int Minimiser(const char * algoName, int printlevel){
+int Minimiser(const char * algoName, int printlevel, double mu_ggF){
   ROOT::Math::Minimizer* min = new ROOT::Minuit2::Minuit2Minimizer(algoName);
 
   min->SetMaxFunctionCalls(1000000);
@@ -91,22 +92,36 @@ int Minimiser(const char * algoName, int printlevel){
 
   ROOT::Math::Functor f(&LLH, 2);
 
-  double variable[2] = {1.,1.};
-  double step[2] = {0.01, 0.01};
+  double variable[2] = {1., mu_ggF};
+  double step[2] = {0.01, 0.0};
+
+  //double variable[2] = {1.,1.};
+  //double step[2] = {0.01, 0.01};
 
   min->SetFunction(f);
 
-  min->SetVariable(0, "mu_ggF", variable[0], step[0]);
-  min->SetVariable(1, "mu_VBF", variable[1], step[1]);
+  min->SetVariable(0, "mu_VBF", variable[0], step[0]);
+  min->SetFixedVariable(1, "mu_ggF", variable[1]);
   //min->SetVariable(2, "mu_b", variable[2], step[2]);
 
   min->Minimize();
 
   const double *vals = min->X();
-  std::cout << "Minimum: f(" << vals[0] << "," << vals[1] <<  ")" << " " << min->MinValue() << std::endl;
+  std::cout << "Minimum: f(" << vals[0] << ", " << vals[1] << ")" << " " << min->MinValue() << std::endl;
 
   return 0;
 
+}
+
+vector<double> linspace(int a, int b, double num){
+  vector<double> v(num);
+  double temp = 0.0;
+  for (int i = 0; i < num; i++)
+    {
+      double val = a + i*((b-a)/num);
+      v.push_back(val);
+    }
+  return v;
 }
 
 int main(int argc, const char *argv[]){
@@ -114,6 +129,7 @@ int main(int argc, const char *argv[]){
  
     int printLevel =0;
     std::string algoName = "";
+    double mu_ggF = 1.0;
 
     for (int i =1 ; i < argc ; i++){
 
@@ -121,8 +137,10 @@ int main(int argc, const char *argv[]){
 
     }
 
-    int iret = Minimiser(algoName.c_str(), printLevel);
+    int iret = Minimiser(algoName.c_str(), printLevel, mu_ggF);
     return iret;
 
 }
+
+
 

@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+mass = np.linspace(0, 50, 101)
+
+alpha = (1.16E-19)**2/4*np.pi
+
+F = 3.78
+Z = 74
+
+alpha_h = (0.510**2)*(11.66)*np.sqrt(2)/4*np.pi
+
+m_e = 0.510
+
+A = (2*alpha**2*alpha_h*Z*F)/m_e**2
+
+def B(m):
+    return m**2/m_e**2
+
+def cross_section(m):
+    b = B(m)
+    first = (-2*b**3+7*b**2-2*b)/(b-4)
+    second = (5*b**2 - 34*b +54)/((b-4)/b)**(3/2))*(np.arctanh((b-2)/(np.sqrt(b)*np.sqrt(b-4)) - np.arctanh(b/(np.sqrt(b)*np.sqrt(b-4)))))
+    third = 4b + 1.5
+    fourth = (-2.5*b**2 + 2*b)*np.log(b)
+    return (1/3)*(first + second + third + fourth)
+
+xsecs = []
+
+for m in mass:
+    xsecs.append(cross_section(m))
+
+plt.scatter(mass. xsecs)
+plt.xlabel('Higgs boson mass [MeV]')
+plt.ylabel('Cross section [b]')
+plt.show()
+    
+                                            
+
+
+
+
+    

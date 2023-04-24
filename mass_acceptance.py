@@ -1,0 +1,63 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+mass = np.linspace(0, 50, 10001)
+
+alpha = 0.510**2*11.66*np.sqrt(2)/(4*np.pi)
+m_e = 0.510
+
+def tau_inverse(m):
+    return 0.5*alpha*m*(1 - 4*m_e**2/m**2)**(3/2)
+
+inverse_taus = []
+
+for m in mass:
+    tau = tau_inverse(m)
+    inverse_taus.append(tau)
+
+energy = 1.6E3
+
+def gamma(m):
+    return energy/m
+
+gammas = []
+
+for m in mass:
+    gammas.append(gamma(m))
+
+def momentum(m):
+    return np.sqrt(energy**2 - m**2)
+
+momentums = []
+
+for m in mass:
+    momentums.append(momentum(m))
+
+
+def beta(gamma, p, m):
+    return p/(m*gamma)
+
+betas = []
+for i, j in enumerate(mass):
+    betas.append(beta(gammas[i], momentums[i], j))
+
+def exponent(m, tau, beta, gamma):
+    return -4*tau/(beta*gamma)
+
+exponents = []
+
+for i, j in enumerate(mass):
+    exponents.append(exponent(j, inverse_taus[i], betas[i], gammas[i]))
+
+def acceptance(exponent):
+    return np.exp(exponent)
+
+acceptances = []
+
+for e in exponents:
+    acceptances.append(acceptance(e))
+
+plt.scatter(mass, acceptances)
+plt.xlabel('Higgs boson mass [MeV]')
+plt.ylabel('Acceptance')
+plt.show()
