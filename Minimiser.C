@@ -18,8 +18,8 @@ using namespace RooFit;
 
 void Minimiser(){
   
-  RooRealVar mu_ggF("mu_ggF", "ggF signal strength", 1, -10000.0, 10000.0);
-  RooRealVar mu_VBF("mu_VBF", "VBF signal strength", 1, -10000.0, 10000.0);
+  RooRealVar mu_ggF("mu_ggF", "ggF signal strength", 1, -1.0, 2.0);
+  RooRealVar mu_VBF("mu_VBF", "VBF signal strength", 1, -1.0, 2.0);
 
   // Expected number of events
   RooRealVar n_ggF_SR1("n_ggF_SR1", "", 16.2);
@@ -30,8 +30,8 @@ void Minimiser(){
   RooRealVar n_b_SR2("n_b_SR2", "", 0.9);
 
   // Data 
-  RooRealVar N_SR1_obs("N_SR1_obs", "", 24);
-  RooRealVar N_SR2_obs("N_SR2_obs", "", 8);
+  RooRealVar N_SR1_obs("N_SR1_obs", "", 22.3);
+  RooRealVar N_SR2_obs("N_SR2_obs", "", 7.2);
 
   // Model
   RooFormulaVar N_SR1("N_SR1", "mu_ggF*n_ggF_SR1 + mu_VBF*n_VBF_SR1 + n_b_SR1", RooArgSet(mu_ggF, n_ggF_SR1, mu_VBF, n_VBF_SR1, n_b_SR1));
@@ -80,4 +80,25 @@ void Minimiser(){
 
   m.minos();
 
+  /*
+  RooPlot *frame = mu_ggF.frame(Bins(10), Range(0.0, 2.0));
+  nll->plotOn(frame, ShiftToZero());
+
+  new TCanvas("", "", 600, 600);
+
+  frame->Draw();
+  */
+  
+
+  RooPlot *frame = m.contour(mu_ggF, mu_VBF, 1, 2, 3);
+  
+  new TCanvas("", "", 600, 600);
+
+  //frame->SetMinimum(-2.0);
+  //frame->SetMaximum(2.0);
+  frame->SetTitle("Signal strength contour plot");
+
+  auto legend = new TLegend(0.1, 0.7, 0.48, 0.9);
+  frame->Draw();
+ 
 }
