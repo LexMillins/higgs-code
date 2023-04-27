@@ -42,9 +42,6 @@ void Minimiser(){
   RooPoisson p1("p1", "", N, N_SR1);
   RooPoisson p2("p2", "", N, N_SR2);
 
-  //RooAddPdf model_SR1("model_SR1", "", RooArgSet(p1));
-  //RooAddPdf model_SR2("model_SR2", "", RooArgSet(p2));
-
   RooDataSet *data_SR1 = p1.generate(RooArgSet(N), 1000);
   RooDataSet *data_SR2 = p2.generate(RooArgSet(N), 1000);
 
