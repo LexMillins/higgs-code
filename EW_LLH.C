@@ -16,8 +16,10 @@ void EW_LLH(){
 
   //Variables
 
-  RooRealVar mH("mH", "Higgs mass", 100, 50, 150);
+  RooRealVar mH("mH", "Higgs mass", 125, 20, 150);
 
+
+  // ----------------------- W mass -----------------------------
   //Parameters
   RooRealVar M_W_ini("M_W_ini", "", 80.3799);
   RooRealVar c1("c1", "", 0.05429);
@@ -33,6 +35,7 @@ void EW_LLH(){
   RooRealVar c11("c11", "", 114.9);
 
   RooRealVar mt("mt", "", 172.4);
+  RooRealVar mt_err("mt_err", "", 0.1724);
   RooRealVar mZ("mZ", "", 91.1875);
   RooRealVar mW_meas("mW_meas", "", 80.399);
   RooRealVar mW_err("mW_err", "", 0.80399);
@@ -48,25 +51,34 @@ void EW_LLH(){
   RooFormulaVar dH("dH", "log(mH/100)", RooArgSet(mH));
   RooFormulaVar dh("dh", "(mH/100)**2", RooArgSet(mH));
 
-  RooFormulaVar H_terms("H_terms", "-c1*dH -c2*(dH**2) + c3*(dH**4)", RooArgSet(c1, c2, dH, c3));
-  RooFormulaVar term5("term5", "c4*(dh-1)", RooArgSet(c4, dh));
-  RooFormulaVar term6("term6", "-c5*dalpha", RooArgSet(c5, dalpha));
-  RooFormulaVar t_terms("t_terms", "c6*dt - c7*dt**2", RooArgSet(c6, dt, c7));
-  RooFormulaVar mix_terms("mix_terms", "-c8*dH*dt + c9*dh*dt", RooArgSet(c8, dH, dt, c9, dh));
-  RooFormulaVar final_term("final_term", "-c10*dalpha_s + c11*dZ", RooArgSet(c10, dalpha_s, c11, dZ));
+  RooFormulaVar H_terms("H_terms", "-c1*dH -c2*(dH**2) + c3*(dH**4)", RooArgList(c1, c2, dH, c3));
+  RooFormulaVar term5("term5", "c4*(dh-1)", RooArgList(c4, dh));
+  RooFormulaVar term6("term6", "-c5*dalpha", RooArgList(c5, dalpha));
+  RooFormulaVar t_terms("t_terms", "c6*dt - c7*dt**2", RooArgList(c6, dt, c7));
+  RooFormulaVar mix_terms("mix_terms", "-c8*dH*dt + c9*dh*dt", RooArgList(c8, dH, dt, c9, dh));
+  RooFormulaVar final_term("final_term", "-c10*dalpha_s + c11*dZ", RooArgList(c10, dalpha_s, c11, dZ));
 
-  RooFormulaVar mW("mW", "M_W_ini + H_terms + term5 + term6 + t_terms + mix_terms + final_term", RooArgSet(M_W_ini, H_terms, term5, term6, t_terms, mix_terms, final_term));
+  //Build gaussian from formula vars
+ 
+  RooGenericPdf mW("mW", "exp(-((M_W_ini + H_terms + term5 + term6 + t_terms + mix_terms + final_term - mW_meas)**2)/(2*((mW_err)**2)))", RooArgList(M_W_ini, H_terms, term5, term6, t_terms, mix_terms, final_term, mW_meas, mW_err));
 
   // Build PDFs
 
-  //RooRealVar M("M", "", 0, 1000);
-  RooGaussian g("g", "", mW, mW_meas, mW_err);
+  RooRealVar M("M", "", 0, 1000);
+  RooGaussian gt("gt", "", M, mt, mt_err);
 
-  RooDataSet *data = g.generate(mW, 1000);
+  RooProdPdf pdf("pdf", "", mW, gt);
+
+  RooDataSet *data = pdf.generate(M, 10000);
+
 
   // Minimise likelihood
 
-  RooAbsReal * nll = g.createNLL(*data);
+  RooAbsReal * nll = mW.createNLL(*data);
+
+  // ----------------- Weak Mixing Angle ----------------
+
+
 
   RooMinimizer m(*nll);
 
@@ -80,13 +92,19 @@ void EW_LLH(){
   
   m.hesse();
 
-  /*
-
-  RooPlot *frame = m.contour(mH, mW, 1, 2, 3);
+  RooPlot *frame = mH.frame(Bins(10), Range(20.0, 150.0));
+  nll->plotOn(frame, ShiftToZero());
 
   new TCanvas("", "", 600, 600);
-  gPad->SetLeftMragin(0.15);
+
   frame->Draw();
   
+  /*
+  RooPlot *frame = m.contour(mH, M, 1, 2, 3);
+
+  new TCanvas("", "", 600, 600);
+  //gPad->SetLeftMragin(0.15);
+  frame->Draw();
   */
+  
 }
